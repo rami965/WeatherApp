@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		250103E021B4105300D785A3 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 250103DF21B4105300D785A3 /* Utils.swift */; };
+		250103E321B4218100D785A3 /* BackendManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 250103E221B4218100D785A3 /* BackendManager.swift */; };
+		250103E521B426EA00D785A3 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 250103E421B426EA00D785A3 /* Constants.swift */; };
 		250AE07021B2CB1A00D0F55F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 250AE06F21B2CB1A00D0F55F /* AppDelegate.swift */; };
 		250AE07221B2CB1A00D0F55F /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 250AE07121B2CB1A00D0F55F /* HomeViewController.swift */; };
 		250AE07521B2CB1A00D0F55F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 250AE07321B2CB1A00D0F55F /* Main.storyboard */; };
@@ -37,6 +40,9 @@
 
 /* Begin PBXFileReference section */
 		0603443E98C13262BA976D33 /* Pods-WeatherApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeatherApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WeatherApp/Pods-WeatherApp.debug.xcconfig"; sourceTree = "<group>"; };
+		250103DF21B4105300D785A3 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		250103E221B4218100D785A3 /* BackendManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackendManager.swift; sourceTree = "<group>"; };
+		250103E421B426EA00D785A3 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		250AE06C21B2CB1900D0F55F /* WeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		250AE06F21B2CB1A00D0F55F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		250AE07121B2CB1A00D0F55F /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
@@ -93,6 +99,31 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		250103DD21B40FC800D785A3 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				250103DF21B4105300D785A3 /* Utils.swift */,
+				250103E421B426EA00D785A3 /* Constants.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		250103DE21B40FD300D785A3 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				250AE07121B2CB1A00D0F55F /* HomeViewController.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		250103E121B420B500D785A3 /* Network Manager */ = {
+			isa = PBXGroup;
+			children = (
+				250103E221B4218100D785A3 /* BackendManager.swift */,
+			);
+			path = "Network Manager";
+			sourceTree = "<group>";
+		};
 		250AE06321B2CB1900D0F55F = {
 			isa = PBXGroup;
 			children = (
@@ -116,9 +147,11 @@
 		250AE06E21B2CB1900D0F55F /* WeatherApp */ = {
 			isa = PBXGroup;
 			children = (
-				250AE09021B2CD6000D0F55F /* Model */,
 				250AE08F21B2CD4700D0F55F /* Main */,
-				250AE07121B2CB1A00D0F55F /* HomeViewController.swift */,
+				250103E121B420B500D785A3 /* Network Manager */,
+				250103DE21B40FD300D785A3 /* Views */,
+				250AE09021B2CD6000D0F55F /* Model */,
+				250103DD21B40FC800D785A3 /* Helpers */,
 				250AE07621B2CB1D00D0F55F /* Assets.xcassets */,
 				250AE07B21B2CB1D00D0F55F /* Info.plist */,
 			);
@@ -276,13 +309,11 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-WeatherApp/Pods-WeatherApp-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
-				"${BUILT_PRODUCTS_DIR}/NVActivityIndicatorView/NVActivityIndicatorView.framework",
 				"${BUILT_PRODUCTS_DIR}/ObjectMapper/ObjectMapper.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/NVActivityIndicatorView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ObjectMapper.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -339,7 +370,10 @@
 				250AE09B21B2CDCF00D0F55F /* Coord.swift in Sources */,
 				250AE09A21B2CDCF00D0F55F /* Clouds.swift in Sources */,
 				250AE07021B2CB1A00D0F55F /* AppDelegate.swift in Sources */,
+				250103E321B4218100D785A3 /* BackendManager.swift in Sources */,
+				250103E521B426EA00D785A3 /* Constants.swift in Sources */,
 				250AE09E21B2CDCF00D0F55F /* WeatherResponse.swift in Sources */,
+				250103E021B4105300D785A3 /* Utils.swift in Sources */,
 				250AE09F21B2CDCF00D0F55F /* Rain.swift in Sources */,
 				250AE09921B2CDCF00D0F55F /* Sys.swift in Sources */,
 				250AE09D21B2CDCF00D0F55F /* Weather.swift in Sources */,

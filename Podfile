@@ -8,7 +8,7 @@ target 'WeatherApp' do
   # Pods for WeatherApp
 pod 'Alamofire'
 pod 'ObjectMapper'
-pod 'NVActivityIndicatorView'
+#pod 'NVActivityIndicatorView'
 
   target 'WeatherAppTests' do
     inherit! :search_paths
