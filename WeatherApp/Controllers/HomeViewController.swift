@@ -14,15 +14,20 @@ import CoreLocation
 class HomeViewController: UIViewController {
     
     let locationManager = CLLocationManager()
+    let indicator = ActivityIndicator()
+    let settingsVCName = "SettingsViewController"
     var currentLocation: CLLocation?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         initializeLocationManager(locationManager)
-        
-        Utils().showActivityIndicator(on: self.view)
+        indicator.showActivityIndicator(on: self.view)
         getWeatherStatus(for: currentLocation) { (weatherResponse, error) in
-            Utils().hideActivityIndicator()
+            self.indicator.hideActivityIndicator()
+//            guard let settingsViewController = Bundle.main.loadNibNamed(self.settingsVCName,
+//                                                                        owner: self,
+//                                                                        options: nil)?.first as? SettingsViewController
+//                else {return}
         }
     }
 
@@ -61,7 +66,7 @@ class HomeViewController: UIViewController {
                                      encoding: JSONEncoding.default) { (response, error) in
                                         
                                         //Hide the activity indicator.
-                                        Utils().hideActivityIndicator()
+                                        //Utils().hideActivityIndicator()
                                         
                                         if let err = error {
                                             //Failure
