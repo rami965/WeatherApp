@@ -26,16 +26,18 @@ class CityViewController: UIViewController {
     let locationManager = CLLocationManager()
     let indicator = ActivityIndicator()
     let settingsVCName = "SettingsViewController"
-    var currentLocation: CLLocation?
+    var location: CLLocation?
     let numberOfDays = 5
     let cellHeight = 100
     let cellWidth = 100
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.hideNavigationBar()
         initializeLocationManager(locationManager)
         indicator.showActivityIndicator(on: self.view)
-        getWeatherStatus(for: currentLocation) { (weatherResponse, error) in
+        
+        getWeatherStatus(for: location) { (weatherResponse, error) in
             self.indicator.hideActivityIndicator()
             
             if let err = error {
@@ -67,7 +69,7 @@ class CityViewController: UIViewController {
     private func fillWeatherData(_ data: WeatherResponse) {
         cityNameLabel.text = data.name
         dateLabel.text = Utils.getDateFromTimeStamp(data.dt!)
-        currentTempratureLabel.text = Int(data.main!.temp!).description
+        currentTempratureLabel.text = Int(data.main!.temp!).description + "°"
         humidityLabel.text = data.main?.humidity?.description
         rainLabel.text = data.rain?.threeHours?.description
         windLabel.text = data.wind?.speed?.description
@@ -158,7 +160,7 @@ class CityViewController: UIViewController {
 extension CityViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager,
                          didUpdateLocations locations: [CLLocation]) {
-        currentLocation = manager.location
+        location = manager.location
         
         //stop updating location to save battery life.
         manager.stopUpdatingLocation()
