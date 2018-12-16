@@ -26,14 +26,79 @@ class Utils {
     ///
     /// - Parameters:
     ///     - title: The alert view title.
-    ///     - message: The alert view title message.
+    ///     - message: The alert view message.
     ///     - vc: The view controller to show alert on.
     class func showAlert(_ title: String,
                          _ message: String,
                          _ vc: UIViewController?) {
         
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "Ok",
+                                     style: UIAlertActionStyle.default)
+        alertController.addAction(okAction)
         vc?.present(alertController, animated: true)
+    }
+    
+    /// Check the string if it's nil or empty.
+    ///
+    /// - Parameters:
+    ///     - text: The string to check against.
+    class func isValidText(_ text: String?) -> Bool {
+        if let txt = text, !txt.isEmpty,
+            !(txt.trimmingCharacters(in: .whitespaces).isEmpty) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    
+    /// Show alert view with input text field.
+    ///
+    /// - Parameters:
+    ///     - title: The alert view title.
+    ///     - subtitle: The alert view subtitle.
+    ///     - actionTitle: The ok button action title.
+    ///     - cancelTitle: The cancel button action title.
+    ///     - inputPlaceholder: The place holder of the input field.
+    ///     - inputKeyboardType: The keyboard type of the input field.
+    ///     - viewController: The view controller to show alert on.
+    ///     - cancelHandler: A closure that handles the cancel action.
+    ///     - actionHandler: A closure that handles the ok action.
+    class func showInputDialog(title:String? = nil,
+                         subtitle:String? = nil,
+                         actionTitle:String? = "Ok",
+                         cancelTitle:String? = "Cancel",
+                         inputPlaceholder:String? = nil,
+                         inputKeyboardType:UIKeyboardType = UIKeyboardType.default,
+                         viewController: UIViewController,
+                         cancelHandler: ((UIAlertAction) -> Swift.Void)? = nil,
+                         actionHandler: ((_ text: String?) -> Void)? = nil) {
+        
+        let alert = UIAlertController(title: title,
+                                      message: subtitle,
+                                      preferredStyle: .alert)
+        
+        alert.addTextField { (textField: UITextField) in
+            textField.placeholder = inputPlaceholder
+            textField.keyboardType = inputKeyboardType
+        }
+        
+        alert.addAction(UIAlertAction(title: actionTitle,
+                                      style: .destructive,
+                                      handler: { (action:UIAlertAction) in
+            guard let textField =  alert.textFields?.first else {
+                actionHandler?(nil)
+                return
+            }
+            actionHandler?(textField.text)
+        }))
+        
+        alert.addAction(UIAlertAction(title: cancelTitle,
+                                      style: .cancel,
+                                      handler: cancelHandler))
+        
+        viewController.present(alert, animated: true, completion: nil)
     }
     
     /// Add new city to saved cities.

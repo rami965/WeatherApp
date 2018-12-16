@@ -20,24 +20,28 @@ class CityViewController: UIViewController {
     @IBOutlet weak var humidityLabel: UILabel!
     @IBOutlet weak var rainLabel: UILabel!
     @IBOutlet weak var windLabel: UILabel!
+    @IBOutlet weak var rainView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
     
     
     let locationManager = CLLocationManager()
     let indicator = ActivityIndicator()
     let settingsVCName = "SettingsViewController"
-    var location: CLLocation?
     let numberOfDays = 5
     let cellHeight = 100
     let cellWidth = 100
+    
+    var cityName: String?
+    var location: CLLocation?
+    var forecastResponse: ForecastResponse?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.hideNavigationBar()
         initializeLocationManager(locationManager)
         indicator.showActivityIndicator(on: self.view)
-        
-        getWeatherStatus(for: location) { (weatherResponse, error) in
+
+        getWeatherStatus(for: location, isForecast: false, completion: { (weatherResponse, error) in
             self.indicator.hideActivityIndicator()
             
             if let err = error {
@@ -47,8 +51,7 @@ class CityViewController: UIViewController {
                 //Success
                 self.fillWeatherData(response)
             }
-
-        }
+        })
     }
 
     /// Initialize the location manager instance,
@@ -67,13 +70,18 @@ class CityViewController: UIViewController {
     /// - Parameters:
     ///     - data: The weather data object.
     private func fillWeatherData(_ data: WeatherResponse) {
-        cityNameLabel.text = data.name
+        cityNameLabel.text = Utils.isValidText(data.name) ? data.name : cityName
         dateLabel.text = Utils.getDateFromTimeStamp(data.dt!)
         currentTempratureLabel.text = Int(data.main!.temp!).description + "°"
         humidityLabel.text = data.main?.humidity?.description
         rainLabel.text = data.rain?.threeHours?.description
         windLabel.text = data.wind?.speed?.description
         setWeatherImage(data.weather?[0].id ?? 0, weatherImageView)
+        
+        //check to show / hide rain status
+        if data.rain == nil {
+            rainView.removeFromSuperview()
+        }
     }
     
     /// Set weather status image view.
@@ -114,15 +122,21 @@ class CityViewController: UIViewController {
     ///
     /// - Parameters:
     ///     - location: The location to get its weather info.
+    ///     - isForecast: A flag to check the weather type.
     ///     - completion: A closure to be executed once the request has finished.
+    ///     - forecastCompletion: A closure to be executed once the forecast request has finished.
     private func getWeatherStatus(for location: CLLocation?,
-                                  completion: @escaping (WeatherResponse?, String?) -> ()) {
+                                  isForecast: Bool,
+                                  completion: ((WeatherResponse?, String?) -> ())? = nil,
+                                  forecastCompletion: ((ForecastResponse?, String?) -> ())? = nil) {
         
         var apiURLString = APIEndPoints.baseUrl
+        apiURLString += isForecast ? "forecast" : "weather"
         apiURLString += "/?lat="
         apiURLString += location?.coordinate.latitude.description ?? "0.0"
         apiURLString += "&lon="
         apiURLString += location?.coordinate.longitude.description ?? "0.0"
+        apiURLString += "&units=metric"
         
         
         let headers: HTTPHeaders = ["x-api-key": APIKeys.weatherAPIKey]
@@ -132,23 +146,33 @@ class CityViewController: UIViewController {
                                      headers: headers,
                                      encoding: JSONEncoding.default) { (response, error) in
                                         
-                                        //Hide the activity indicator.
-                                        //Utils().hideActivityIndicator()
-                                        
                                         if let err = error {
                                             //Failure
                                             debugPrint(err)
-                                            completion(nil, err.localizedDescription)
+                                            completion?(nil, err.localizedDescription)
                                         } else {
                                             //Success
                                             if let JSON = response as? [String: Any],
                                                 let weatherResponse = Mapper<WeatherResponse>().map(JSON: JSON) {
-                                                completion(weatherResponse, nil)
+                                                completion?(weatherResponse, nil)
+                                                
+                                            } else if let JSON = response as? [String: Any],
+                                                let forecastResponse = Mapper<ForecastResponse>().map(JSON: JSON) {
+                                                forecastCompletion?(forecastResponse, nil)
                                             } else {
-                                                completion(nil, "Cannot parse the response")
+                                                print("Can't parse response ...")
                                             }
                                         }
         }
+    }
+    
+    
+    /// Go back to main screen.
+    ///
+    /// - Parameters:
+    ///     - sender: The back UIButton.
+    @IBAction func backAction(_ sender: UIButton) {
+        navigationController?.popViewController(animated: true)
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -179,12 +203,21 @@ extension CityViewController: UICollectionViewDataSource, UICollectionViewDelega
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return numberOfDays
+        return forecastResponse?.list?.count ?? 0 >= numberOfDays ? numberOfDays : 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let identifier = "weeklyCell"
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as! WeeklyWeatherCollectionViewCell
+        
+        let day = forecastResponse?.list?[indexPath.row]
+        var weekDay: String {
+            let date = Date(timeIntervalSince1970: Double(day!.dt!))
+            let formatter = DateFormatter()
+            formatter.dateFormat = "EEEE, MMM d"
+            return formatter.string(from: date)
+        }
+        
         
         return cell
     }

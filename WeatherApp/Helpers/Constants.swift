@@ -9,7 +9,7 @@
 import Foundation
 
 struct APIEndPoints {
-    static let baseUrl = "http://api.openweathermap.org/data/2.5/weather"
+    static let baseUrl = "http://api.openweathermap.org/data/2.5/"
 }
 
 struct APIKeys {
