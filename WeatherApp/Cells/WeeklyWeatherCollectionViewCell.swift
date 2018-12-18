@@ -9,5 +9,8 @@
 import UIKit
 
 class WeeklyWeatherCollectionViewCell: UICollectionViewCell {
+    @IBOutlet weak var weekdayLabel: UILabel!
+    @IBOutlet weak var statusImageView: UIImageView!
+    @IBOutlet weak var tempLabel: UILabel!
     
 }

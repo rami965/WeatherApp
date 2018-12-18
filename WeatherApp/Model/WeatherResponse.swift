@@ -9,7 +9,7 @@
 import Foundation
 import ObjectMapper
 
-struct WeatherResponse : Mappable {
+class WeatherResponse : Mappable {
 	var coord : Coord?
 	var weather : [Weather]?
 	var base : String?
@@ -23,12 +23,9 @@ struct WeatherResponse : Mappable {
 	var name : String?
 	var cod : Int?
 
-	init?(map: Map) {
+    required init?(map: Map) {}
 
-	}
-
-	mutating func mapping(map: Map) {
-
+    func mapping(map: Map) {
 		coord   <- map["coord"]
 		weather <- map["weather"]
 		base    <- map["base"]
@@ -43,4 +40,12 @@ struct WeatherResponse : Mappable {
 		cod     <- map["cod"]
 	}
 
+    
 }
+
+//extension WeatherResponse: Equatable {
+//    static func == (lhs: WeatherResponse, rhs: WeatherResponse) -> Bool {
+//        return Calendar.current.isDate(Date(timeIntervalSince1970: Double(lhs.dt ?? 0)),
+//                                       inSameDayAs: Date(timeIntervalSince1970: Double(rhs.dt ?? 0)))
+//    }
+//}

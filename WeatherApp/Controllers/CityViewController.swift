@@ -23,7 +23,6 @@ class CityViewController: UIViewController {
     @IBOutlet weak var rainView: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
     
-    
     let locationManager = CLLocationManager()
     let indicator = ActivityIndicator()
     let settingsVCName = "SettingsViewController"
@@ -39,19 +38,62 @@ class CityViewController: UIViewController {
         super.viewDidLoad()
         self.navigationController?.hideNavigationBar()
         initializeLocationManager(locationManager)
+        
+        //init collection view
+        adjustCollectionViewLayout(collectionView)
+        
+        //show indicator
         indicator.showActivityIndicator(on: self.view)
-
-        getWeatherStatus(for: location, isForecast: false, completion: { (weatherResponse, error) in
-            self.indicator.hideActivityIndicator()
-            
-            if let err = error {
-                //Failure
-                Utils.showAlert("Error", err, self)
-            } else if let response = weatherResponse {
-                //Success
-                self.fillWeatherData(response)
+        
+        getWeatherStatus(for: location,
+                         isForecast: false,
+                         completion: { (weatherResponse, error) in
+                            
+                            if let err = error {
+                                //Failure
+                                Utils.showAlert("Error", err, self)
+                            } else if let response = weatherResponse {
+                                //Success
+                                self.fillWeatherData(response)
+                                
+                                //get next five days forecast
+                                self.getWeatherStatus(for: self.location,
+                                                      isForecast: true,
+                                                      forecastCompletion: { (forecastResponse, error) in
+                                                        //populate the array
+                                                        self.forecastResponse = forecastResponse
+                                                        
+                                                        //remove duplicates
+                                                        self.forecastResponse?.list = self.filterDaysList(forecastResponse?.list)
+                                                        
+                                                        //reload the collection
+                                                        self.collectionView.reloadData()
+                                })
+                            }
+        })
+    }
+    
+    /// Filter array of days to get first record for each day.
+    ///
+    /// - Parameters:
+    ///     - daysList: The days list to be filtered.
+    ///
+    /// - Returns:
+    ///     - The filteredDaysList.
+    private func filterDaysList(_ daysList: [WeatherResponse]?) -> [WeatherResponse] {
+        var uniqueDays = [WeatherResponse]()
+        
+        daysList?.forEach({ (record) in
+            let recordDate = Date(timeIntervalSince1970: Double(record.dt ?? 0))
+            if !uniqueDays.contains(where: { (uniqueDay) -> Bool in
+                let uniqueDayDate = Date(timeIntervalSince1970: Double(uniqueDay.dt ?? 0))
+                return Calendar.current.isDate(uniqueDayDate, inSameDayAs: recordDate)
+            }) {
+                uniqueDays.append(record)
             }
         })
+        
+        return uniqueDays
     }
 
     /// Initialize the location manager instance,
@@ -65,6 +107,19 @@ class CityViewController: UIViewController {
         manager.startUpdatingLocation()
     }
     
+    /// Adjust collection view layout spacing.
+    ///
+    /// - Parameters:
+    ///     - collectionView: The collection view instance.
+    private func adjustCollectionViewLayout(_ collectionView: UICollectionView) {
+        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets.zero
+        layout.minimumInteritemSpacing = 0
+        layout.minimumLineSpacing = 0
+        layout.scrollDirection = .horizontal
+        collectionView.collectionViewLayout = layout
+    }
+    
     /// Fill the weather data in view.
     ///
     /// - Parameters:
@@ -72,11 +127,11 @@ class CityViewController: UIViewController {
     private func fillWeatherData(_ data: WeatherResponse) {
         cityNameLabel.text = Utils.isValidText(data.name) ? data.name : cityName
         dateLabel.text = Utils.getDateFromTimeStamp(data.dt!)
-        currentTempratureLabel.text = Int(data.main!.temp!).description + "°"
+        currentTempratureLabel.text = Int(data.main?.temp ?? 0.0).description + "°"
         humidityLabel.text = data.main?.humidity?.description
         rainLabel.text = data.rain?.threeHours?.description
         windLabel.text = data.wind?.speed?.description
-        setWeatherImage(data.weather?[0].id ?? 0, weatherImageView)
+        weatherImageView.image = getWeatherImage(data.weather?[0].id ?? 0)
         
         //check to show / hide rain status
         if data.rain == nil {
@@ -88,32 +143,34 @@ class CityViewController: UIViewController {
     ///
     /// - Parameters:
     ///     - status: The weather status code.
-    ///     - imageView: The weather status image view.
-    private func setWeatherImage(_ status: Int, _ imageView: UIImageView) {
+    ///
+    /// - Returns:
+    ///     - The weather status image.
+    private func getWeatherImage(_ status: Int) -> UIImage {
         switch status {
         case 200..<300:
             //Thunderstorm
-            imageView.image = #imageLiteral(resourceName: "Thunderstorm")
+            return #imageLiteral(resourceName: "Thunderstorm")
         case 300..<400:
             //Drizzle
-            imageView.image = #imageLiteral(resourceName: "Drizzle")
+            return #imageLiteral(resourceName: "Drizzle")
         case 500..<600:
             //Rain
-            imageView.image = #imageLiteral(resourceName: "Rain")
+            return #imageLiteral(resourceName: "Rain")
         case 600..<700:
             //Snow
-            imageView.image = #imageLiteral(resourceName: "Snow")
+            return #imageLiteral(resourceName: "Snow")
         case 700..<800:
             //Atmosphere
-            imageView.image = #imageLiteral(resourceName: "Atmosphere")
+            return #imageLiteral(resourceName: "Atmosphere")
         case 801..<810:
             //Clouds
-            imageView.image = #imageLiteral(resourceName: "Clouds")
+            return #imageLiteral(resourceName: "Clouds")
         case 800:
             //Clear
-            imageView.image = #imageLiteral(resourceName: "Clear")
+            return #imageLiteral(resourceName: "Clear")
         default:
-            imageView.image = #imageLiteral(resourceName: "Clear")
+            return #imageLiteral(resourceName: "Clear")
         }
     }
     
@@ -146,6 +203,9 @@ class CityViewController: UIViewController {
                                      headers: headers,
                                      encoding: JSONEncoding.default) { (response, error) in
                                         
+                                        //hide indicator
+                                        self.indicator.hideActivityIndicator()
+                                        
                                         if let err = error {
                                             //Failure
                                             debugPrint(err)
@@ -153,11 +213,15 @@ class CityViewController: UIViewController {
                                         } else {
                                             //Success
                                             if let JSON = response as? [String: Any],
-                                                let weatherResponse = Mapper<WeatherResponse>().map(JSON: JSON) {
+                                                let weatherResponse = Mapper<WeatherResponse>().map(JSON: JSON),
+                                                !isForecast {
+                                                //current weather status
                                                 completion?(weatherResponse, nil)
                                                 
                                             } else if let JSON = response as? [String: Any],
-                                                let forecastResponse = Mapper<ForecastResponse>().map(JSON: JSON) {
+                                                let forecastResponse = Mapper<ForecastResponse>().map(JSON: JSON),
+                                                isForecast {
+                                                //forecast weather status
                                                 forecastCompletion?(forecastResponse, nil)
                                             } else {
                                                 print("Can't parse response ...")
@@ -211,13 +275,16 @@ extension CityViewController: UICollectionViewDataSource, UICollectionViewDelega
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as! WeeklyWeatherCollectionViewCell
         
         let day = forecastResponse?.list?[indexPath.row]
-        var weekDay: String {
+        var weekday: String {
             let date = Date(timeIntervalSince1970: Double(day!.dt!))
             let formatter = DateFormatter()
-            formatter.dateFormat = "EEEE, MMM d"
+            formatter.dateFormat = "EEEE"
             return formatter.string(from: date)
         }
         
+        cell.weekdayLabel.text = weekday
+        cell.tempLabel.text = Int(day?.main?.temp ?? 0.0).description + "°"
+        cell.statusImageView.image = getWeatherImage(day?.weather?[0].id ?? 0)
         
         return cell
     }
@@ -231,6 +298,29 @@ extension CityViewController: UICollectionViewDataSource, UICollectionViewDelega
         } else {
             //return default size
             return CGSize(width: cellWidth, height: cellHeight)
+        }
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        switch indexPath.row {
+        case 0:
+            cell.backgroundColor = Utils.UIColorFromHex(rgbValue: 0xd9a9ce)
+            break
+        case 1:
+            cell.backgroundColor = Utils.UIColorFromHex(rgbValue: 0xd29cc5)
+            break
+        case 2:
+            cell.backgroundColor = Utils.UIColorFromHex(rgbValue: 0xc486b9)
+            break
+        case 3:
+            cell.backgroundColor = Utils.UIColorFromHex(rgbValue: 0xba75b1)
+            break
+        case 4:
+            cell.backgroundColor = Utils.UIColorFromHex(rgbValue: 0xac65a2)
+            break
+        default:
+            cell.backgroundColor = .clear
         }
     }
 }
