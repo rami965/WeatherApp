@@ -106,9 +106,9 @@ class Utils {
     /// - Parameters:
     ///     - name: The new city name.
     ///     - location: The new city location.
-    class func addCity(_ name: String, _ location: CLLocation) {
-        var savedDictionary = [String: CLLocation]()
-        if let savedLocations = UserDefaults.standard.object(forKey: "savedLocations") as? [String: CLLocation] {
+    class func addCity(_ name: String, _ location: String) {
+        var savedDictionary = [String: String]()
+        if let savedLocations = UserDefaults.standard.object(forKey: "savedLocations") as? [String: String] {
             //there are saved locations
             savedDictionary = savedLocations
         }
@@ -125,7 +125,7 @@ class Utils {
     /// - Parameters:
     ///     - name: The city name to be removed.
     class func removeCity(_ name: String) {
-        if var savedLocations = UserDefaults.standard.object(forKey: "savedLocations") as? [String: CLLocation],
+        if var savedLocations = UserDefaults.standard.object(forKey: "savedLocations") as? [String: String],
             savedLocations[name] != nil {
             //the city exists before
             savedLocations.removeValue(forKey: name)
@@ -136,8 +136,8 @@ class Utils {
     }
     
     /// Get the saved locations dictionary.
-    class func getSavedCities() -> [String: CLLocation]? {
-        return UserDefaults.standard.object(forKey: "savedLocations") as? [String: CLLocation]
+    class func getSavedCities() -> [String: String]? {
+        return UserDefaults.standard.object(forKey: "savedLocations") as? [String: String]
     }
     
     /// Define UIColor from hex value.

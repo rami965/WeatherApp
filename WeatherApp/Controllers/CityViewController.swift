@@ -20,7 +20,7 @@ class CityViewController: UIViewController {
     @IBOutlet weak var humidityLabel: UILabel!
     @IBOutlet weak var rainLabel: UILabel!
     @IBOutlet weak var windLabel: UILabel!
-    @IBOutlet weak var rainView: UIView!
+    @IBOutlet weak var bookmarkButton: UIButton!
     @IBOutlet weak var collectionView: UICollectionView!
     
     let locationManager = CLLocationManager()
@@ -30,6 +30,7 @@ class CityViewController: UIViewController {
     let cellHeight = 100
     let cellWidth = 100
     
+    var isBookmarked = false
     var cityName: String?
     var location: CLLocation?
     var forecastResponse: ForecastResponse?
@@ -45,6 +46,11 @@ class CityViewController: UIViewController {
         //show indicator
         indicator.showActivityIndicator(on: self.view)
         
+        //check if city is bookmarked before
+        if isBookmarked {
+            bookmarkButton.setImage(#imageLiteral(resourceName: "bookmarked"), for: .normal)
+        }
+        
         getWeatherStatus(for: location,
                          isForecast: false,
                          completion: { (weatherResponse, error) in
@@ -55,6 +61,9 @@ class CityViewController: UIViewController {
                             } else if let response = weatherResponse {
                                 //Success
                                 self.fillWeatherData(response)
+                                
+                                //set city name
+                                self.cityName = weatherResponse?.name
                                 
                                 //get next five days forecast
                                 self.getWeatherStatus(for: self.location,
@@ -129,14 +138,9 @@ class CityViewController: UIViewController {
         dateLabel.text = Utils.getDateFromTimeStamp(data.dt!)
         currentTempratureLabel.text = Int(data.main?.temp ?? 0.0).description + "°"
         humidityLabel.text = data.main?.humidity?.description
-        rainLabel.text = data.rain?.threeHours?.description
+        rainLabel.text = data.rain?.threeHours?.description ?? "0"
         windLabel.text = data.wind?.speed?.description
         weatherImageView.image = getWeatherImage(data.weather?[0].id ?? 0)
-        
-        //check to show / hide rain status
-        if data.rain == nil {
-            rainView.removeFromSuperview()
-        }
     }
     
     /// Set weather status image view.
@@ -236,7 +240,51 @@ class CityViewController: UIViewController {
     /// - Parameters:
     ///     - sender: The back UIButton.
     @IBAction func backAction(_ sender: UIButton) {
-        navigationController?.popViewController(animated: true)
+//        navigationController?.popViewController(animated: true)
+        dismiss(animated: true)
+    }
+    
+    /// Bookmark current city.
+    ///
+    /// - Parameters:
+    ///     - sender: The bookmark UIButton.
+    @IBAction func bookmarkAction(_ sender: UIButton) {
+        guard let name = cityName,
+            let loc = location else {
+                Utils.showAlert("Error",
+                                "Unknown city name, location.",
+                                self)
+                return
+        }
+        
+        if isBookmarked {
+            //city already bookmarked
+            
+            //remove city from bookmarks
+            Utils.removeCity(name)
+            
+            //change bookmark image
+            bookmarkButton.setImage(#imageLiteral(resourceName: "bookmark_action"), for: .normal)
+        } else {
+            //city is not bookmarked
+            
+            //convert location to string
+            var locationString: String{
+                var str = loc.coordinate.latitude.description
+                str += ","
+                str += loc.coordinate.longitude.description
+                return str
+            }
+            
+            //save city name with location
+            Utils.addCity(name, locationString)
+            
+            //change bookmark image
+            bookmarkButton.setImage(#imageLiteral(resourceName: "bookmarked"), for: .normal)
+        }
+        
+        //reverse bookmark flag
+        isBookmarked = !isBookmarked
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
