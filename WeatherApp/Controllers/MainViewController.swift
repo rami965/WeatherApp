@@ -34,14 +34,6 @@ class MainViewController: UIViewController {
         self.navigationController?.hideNavigationBar()
         containerView.autoresizesSubviews = true
         openTab(isMapSelected)
-        
-//        settingsButton.backgroundColor = UIColor(red: 171, green: 178, blue: 186, alpha: 1.0)
-//        settingsButton.layer.shadowColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25).cgColor
-//        settingsButton.layer.shadowOffset = CGSize(width: 4.0, height: 4.0)
-//        settingsButton.layer.shadowOpacity = 1.0
-//        settingsButton.layer.shadowRadius = 2.0
-//        settingsButton.layer.masksToBounds = false
-//        settingsButton.layer.cornerRadius = 24.0
     }
     
     override func viewWillAppear(_ animated: Bool) {
