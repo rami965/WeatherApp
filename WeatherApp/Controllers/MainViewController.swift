@@ -181,8 +181,8 @@ class MainViewController: UIViewController {
         cityViewController.isBookmarked = isBookmarked
         cityViewController.cityName = cityName
         cityViewController.location = cityLocation
-//        navigationController?.pushViewController(cityViewController, animated: true)
-        navigationController?.present(cityViewController, animated: true)
+        navigationController?.pushViewController(cityViewController, animated: true)
+//        navigationController?.present(cityViewController, animated: true)
     }
     
     /// Open the bookmarked locations tab.
@@ -195,6 +195,12 @@ class MainViewController: UIViewController {
     @IBAction func mapTabAction(_ sender: Any) {
         isMapSelected = true
         openTab(isMapSelected)
+    }
+    
+    /// Open settings screen.
+    @IBAction func settingsAction(_ sender: Any) {
+        let settingsViewController = SettingsViewController(nibName: "SettingsViewController", bundle: nil)
+        navigationController?.present(settingsViewController, animated: true)
     }
 }
 

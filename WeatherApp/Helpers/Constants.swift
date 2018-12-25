@@ -15,3 +15,8 @@ struct APIEndPoints {
 struct APIKeys {
     static let weatherAPIKey = "c6e381d8c7ff98f0fee43775817cf6ad"
 }
+
+struct UserDefaultsKeys {
+    static let unitSystem = "isMetric"
+    static let showForecast = "shouldShowForecast"
+}

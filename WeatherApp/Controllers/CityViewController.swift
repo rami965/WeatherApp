@@ -34,7 +34,7 @@ class CityViewController: UIViewController {
     var cityName: String?
     var location: CLLocation?
     var forecastResponse: ForecastResponse?
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.hideNavigationBar()
@@ -65,19 +65,22 @@ class CityViewController: UIViewController {
                                 //set city name
                                 self.cityName = weatherResponse?.name
                                 
-                                //get next five days forecast
-                                self.getWeatherStatus(for: self.location,
-                                                      isForecast: true,
-                                                      forecastCompletion: { (forecastResponse, error) in
-                                                        //populate the array
-                                                        self.forecastResponse = forecastResponse
-                                                        
-                                                        //remove duplicates
-                                                        self.forecastResponse?.list = self.filterDaysList(forecastResponse?.list)
-                                                        
-                                                        //reload the collection
-                                                        self.collectionView.reloadData()
-                                })
+                                if UserDefaults.standard.bool(forKey: UserDefaultsKeys.showForecast) == true ||
+                                    UserDefaults.standard.object(forKey: UserDefaultsKeys.showForecast) == nil {
+                                    //get next five days forecast
+                                    self.getWeatherStatus(for: self.location,
+                                                          isForecast: true,
+                                                          forecastCompletion: { (forecastResponse, error) in
+                                                            //populate the array
+                                                            self.forecastResponse = forecastResponse
+                                                            
+                                                            //remove duplicates
+                                                            self.forecastResponse?.list = self.filterDaysList(forecastResponse?.list)
+                                                            
+                                                            //reload the collection
+                                                            self.collectionView.reloadData()
+                                    })
+                                }
                             }
         })
     }
@@ -104,7 +107,7 @@ class CityViewController: UIViewController {
         
         return uniqueDays
     }
-
+    
     /// Initialize the location manager instance,
     /// handles authorization permission and manager properties.
     ///
@@ -197,7 +200,8 @@ class CityViewController: UIViewController {
         apiURLString += location?.coordinate.latitude.description ?? "0.0"
         apiURLString += "&lon="
         apiURLString += location?.coordinate.longitude.description ?? "0.0"
-        apiURLString += "&units=metric"
+        apiURLString += "&units="
+        apiURLString += UserDefaults.standard.bool(forKey: UserDefaultsKeys.unitSystem) ? "metric" : "imperial"
         
         
         let headers: HTTPHeaders = ["x-api-key": APIKeys.weatherAPIKey]
@@ -240,8 +244,8 @@ class CityViewController: UIViewController {
     /// - Parameters:
     ///     - sender: The back UIButton.
     @IBAction func backAction(_ sender: UIButton) {
-//        navigationController?.popViewController(animated: true)
-        dismiss(animated: true)
+        navigationController?.popViewController(animated: true)
+        //        dismiss(animated: true)
     }
     
     /// Bookmark current city.

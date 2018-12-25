@@ -123,6 +123,9 @@
                                             <constraint firstAttribute="width" secondItem="aKD-hv-TK1" secondAttribute="height" id="hB0-zs-6T9"/>
                                         </constraints>
                                         <state key="normal" image="settings"/>
+                                        <connections>
+                                            <action selector="settingsAction:" destination="iV7-Ao-jKM" eventType="touchUpInside" id="EGA-4H-n3D"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

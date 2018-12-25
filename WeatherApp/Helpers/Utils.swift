@@ -39,6 +39,30 @@ class Utils {
         vc?.present(alertController, animated: true)
     }
     
+    /// Show alert view containing title and message and two buttons,
+    /// ok button to trigger the action and cancel button
+    ///
+    /// - Parameters:
+    ///     - title: The alert view title.
+    ///     - message: The alert view message.
+    ///     - vc: The view controller to show alert on.
+    ///     - action: the action triggered from ok button.
+    class func showAlertWithAction(_ title: String,
+                                   _ message: String,
+                                   _ vc: UIViewController?,
+                                   action: @escaping ((UIAlertAction) -> Void)) {
+        
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "Ok",
+                                     style: UIAlertActionStyle.default,
+                                     handler: action)
+        let cancelAction = UIAlertAction(title: "Cancel",
+                                         style: UIAlertActionStyle.default)
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        vc?.present(alertController, animated: true)
+    }
+    
     /// Check the string if it's nil or empty.
     ///
     /// - Parameters:
@@ -51,7 +75,7 @@ class Utils {
             return false
         }
     }
-
+    
     
     /// Show alert view with input text field.
     ///
@@ -66,14 +90,14 @@ class Utils {
     ///     - cancelHandler: A closure that handles the cancel action.
     ///     - actionHandler: A closure that handles the ok action.
     class func showInputDialog(title:String? = nil,
-                         subtitle:String? = nil,
-                         actionTitle:String? = "Ok",
-                         cancelTitle:String? = "Cancel",
-                         inputPlaceholder:String? = nil,
-                         inputKeyboardType:UIKeyboardType = UIKeyboardType.default,
-                         viewController: UIViewController,
-                         cancelHandler: ((UIAlertAction) -> Swift.Void)? = nil,
-                         actionHandler: ((_ text: String?) -> Void)? = nil) {
+                               subtitle:String? = nil,
+                               actionTitle:String? = "Ok",
+                               cancelTitle:String? = "Cancel",
+                               inputPlaceholder:String? = nil,
+                               inputKeyboardType:UIKeyboardType = UIKeyboardType.default,
+                               viewController: UIViewController,
+                               cancelHandler: ((UIAlertAction) -> Swift.Void)? = nil,
+                               actionHandler: ((_ text: String?) -> Void)? = nil) {
         
         let alert = UIAlertController(title: title,
                                       message: subtitle,
@@ -87,11 +111,11 @@ class Utils {
         alert.addAction(UIAlertAction(title: actionTitle,
                                       style: .destructive,
                                       handler: { (action:UIAlertAction) in
-            guard let textField =  alert.textFields?.first else {
-                actionHandler?(nil)
-                return
-            }
-            actionHandler?(textField.text)
+                                        guard let textField =  alert.textFields?.first else {
+                                            actionHandler?(nil)
+                                            return
+                                        }
+                                        actionHandler?(textField.text)
         }))
         
         alert.addAction(UIAlertAction(title: cancelTitle,
